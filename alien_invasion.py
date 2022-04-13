@@ -119,6 +119,21 @@ class AlienInvasion:
       self.stats.level += 1
       self.sb.prep_level()
 
+  def _update_aliens(self):
+    """
+    艦隊が画面の端にいるか確認してから、
+    艦隊にいるエイリアンの位置を更新する
+    """
+    self._check_fleet_edges()
+    self.aliens.update()
+
+    #エイリアンと宇宙船の衝突を探す
+    if pygame.sprite.spritecollideany(self.ship,self.aliens):
+      self._ship_hit()
+
+    # 画面の一番下に到達したエイリアンを探す
+    self._check_aliens_bottom()
+
   def _create_fleet(self):
     """エイリアンの艦隊を作成する"""
     #エイリアンを1匹作成し、1列のエイリアンの数を求める
@@ -146,30 +161,14 @@ class AlienInvasion:
     alien.rect.y = alien.rect.height + 2 * alien.rect.height * row_number
     self.aliens.add(alien)
 
-
-  def _update_aliens(self):
-    """
-    艦隊が画面の端にいるか確認してから、
-    艦隊にいるエイリアンの位置を更新する
-    """
-    self._check_fleet_edges()
-    self.aliens.update()
-
-    #エイリアンと宇宙船の衝突を探す
-    if pygame.sprite.spritecollideany(self.ship,self.aliens):
-      self._ship_hit()
-
-    # 画面の一番下に到達したエイリアンを探す
-    self._check_aliens_bottom()
-
   def _check_fleet_edges(self):
     """エイリアンが画面の端に達した時の適切な処理を行う"""
     for alien in self.aliens.sprites():
       if alien.check_edges():
-        self._check_fleet_direction()
+        self._change_fleet_direction()
         break
 
-  def _check_fleet_direction(self):
+  def _change_fleet_direction(self):
     """艦隊を下に移動し、横移動の方向を変更する"""
     for alien in self.aliens.sprites():
       alien.rect.y += self.settings.fleet_drop_speed

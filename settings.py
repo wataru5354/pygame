@@ -16,11 +16,11 @@ class Settings:
         self.bullet_width = 3.0
         self.bullet_height = 15
         self.bullet_color = (60,60,60)
-        self.bullet_allowed = 3
+        self.bullet_allowed = 5
 
         #エイリアンの設定
-        self.alien_speed = 1.0
-        self.fleet_drop_speed = 2
+        self.alien_speed = 1
+        self.fleet_drop_speed = 10
 
         # ゲームのスピードアップする速さ
         self.speedup_scale = 1.1
@@ -34,8 +34,8 @@ class Settings:
 
     def initialize_dynamic_settings(self):
         """ゲーム中に変更される設定値を初期化する"""
-        self.ship_speed = 1.5
-        self.bullet_speed = 3.0
+        self.ship_speed = 5.0
+        self.bullet_speed = 10
         self.alien_speed = 1.0
 
         # 艦隊の移動方向を表し、1は右、-1は左に移動することを示す
