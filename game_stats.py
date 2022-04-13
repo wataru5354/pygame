@@ -4,11 +4,14 @@ class GameStats:
     """統計情報を初期化する"""
     self.settings = ai_game.settings
     self.reset_stats()
-    #エイリアン侵略ゲームをアクティブな状態で開始する
-    self.game_active = True
+    #エイリアン侵略ゲームを非アクティブな状態で開始する
+    self.game_active = False
+    # ハイスコアはリセットしない
+    self.high_score = 0
 
   def reset_stats(self):
     """ゲーム中に変更される統計情報を初期化する"""
     self.ships_left = self.settings.ship_limit
+    self.score = 0
   
   
