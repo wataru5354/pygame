@@ -5,6 +5,8 @@ from time import sleep
 import pygame
 from settings import Settings
 from game_stats import GameStats
+from scoreboard import ScoreBoard
+from button import Button
 from ship import Ship
 from bullet import Bullet
 from alien import Alien
@@ -19,10 +21,13 @@ class AlienInvasion:
       pygame.display.set_caption("エイリアン侵略")
       # ゲームの統計情報を格納するインスタンスを生成する
       self.stats = GameStats(self)
+      self.sb = ScoreBoard(self)
       self.ship = Ship(self)
       self.bullets = pygame.sprite.Group()
       self.aliens = pygame.sprite.Group()
       self._create_fleet()
+      # Playボタンの生成
+      self.play_button = Button(self,"Play")
       #ゲームの背景色の設定
       self.bg_color = (230,230,230)
 
@@ -50,6 +55,10 @@ class AlienInvasion:
 
         elif event.type == pygame.KEYUP:
           self._check_keyup_events(event)
+
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+          mouse_pos = pygame.mouse.get_pos()
+          self._check_play_button(mouse_pos)
   
   def _check_keydown_events(self,event):
     if event.key == pygame.K_RIGHT:
@@ -93,10 +102,22 @@ class AlienInvasion:
     collisions = pygame.sprite.groupcollide(
       self.bullets, self.aliens, True,True
     )
+
+    if collisions:
+      for aliens in collisions.values():
+        self.stats.score += self.settings.alien_points * len(aliens)
+      self.sb.prep_score()
+      self.sb.check_high_score()
+
     if not self.aliens:
       #存在する弾を破壊し、新しい艦隊を作成する
       self.bullets.empty()
       self._create_fleet()
+      self.settings.increase_speed()
+
+      # レベルを増やす
+      self.stats.level += 1
+      self.sb.prep_level()
 
   def _create_fleet(self):
     """エイリアンの艦隊を作成する"""
@@ -159,6 +180,7 @@ class AlienInvasion:
     if self.stats.ships_left > 0:
       # 残りの宇宙船の数を減らす
       self.stats.ships_left -= 1
+      self.sb.prep_ships()
 
       # 残ったエイリアンと弾を廃棄する
       self.aliens.empty()
@@ -173,6 +195,7 @@ class AlienInvasion:
 
     else:
       self.stats.game_active = False
+      pygame.mouse.set_visible(True)
 
   def _check_aliens_bottom(self):
     """エイリアンが画面の一番下に到達したかを確認する"""
@@ -183,6 +206,30 @@ class AlienInvasion:
         self._ship_hit()
         break
 
+  def _check_play_button(self,mouse_pos):
+    """プレイヤーがPlayボタンをクリックしたら新規ゲームが始まる"""
+    button_clicked = self.play_button.rect.collidepoint(mouse_pos)
+    if button_clicked and not self.stats.game_active:
+      # ゲームの設定値をリセットする
+      self.settings.initialize_dynamic_settings()
+      #ゲームの統計情報をリセットする
+      self.stats.reset_stats()
+      self.stats.game_active = True
+      self.sb.prep_score()
+      self.sb.prep_level()
+      self.sb.prep_ships()
+
+      # 残ったエイリアンと弾を廃棄する
+      self.aliens.empty()
+      self.bullets.empty()
+
+      # 新しい艦隊を作成し、宇宙船を中央に配置する
+      self._create_fleet()
+      self.ship.center_ship()
+
+      # マウスカーソルを非表示する
+      pygame.mouse.set_visible(False)
+
   def _update_screen(self):
     """画面上の画像を更新し、新しい画面に切り替える"""
     #ループを通過するたびに画面を再描画
@@ -191,6 +238,11 @@ class AlienInvasion:
     for bullet in self.bullets.sprites():
       bullet.draw_bullet()
     self.aliens.draw(self.screen)
+    # 得点の情報を表示する
+    self.sb.show_score()
+    # ゲームが非アクティブの時にPlayボタンを描画する
+    if not self.stats.game_active:
+      self.play_button.draw_button()
     #最新の状態の画面を表示
     pygame.display.flip()
 
