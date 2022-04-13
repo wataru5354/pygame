@@ -36,3 +36,8 @@ class Ship:
     def blitme(self):
         """宇宙船を現在位置に描画する"""
         self.screen.blit(self.image, self.rect)
+
+    def center_ship(self):
+        """宇宙船を画面の中央に配置する"""
+        self.rect.midbottom = self.screen_rect.midbottom
+        self.x = float(self.rect.x)
