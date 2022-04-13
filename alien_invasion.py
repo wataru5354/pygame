@@ -59,7 +59,7 @@ class AlienInvasion:
         elif event.type == pygame.MOUSEBUTTONDOWN:
           mouse_pos = pygame.mouse.get_pos()
           self._check_play_button(mouse_pos)
-  
+
   def _check_keydown_events(self,event):
     if event.key == pygame.K_RIGHT:
       self.ship.moving_right = True
