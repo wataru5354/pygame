@@ -1,10 +1,14 @@
 from decimal import Rounded
 from turtle import color
 import pygame.font
+from pygame.sprite import Group
+from ship import Ship
+
 class ScoreBoard:
   """得点の情報を表示する"""
   def __init__(self,ai_game):
     """得点を記録するための属性を初期化する"""
+    self.ai_game = ai_game
     self.screen = ai_game.screen
     self.screen_rect = self.screen.get_rect()
     self.settings = ai_game.settings
@@ -15,10 +19,12 @@ class ScoreBoard:
     self.font = pygame.font.SysFont(None,48)
 
     #初期の得点画像を準備する
-    self._prep_score()
+    self.prep_score()
     self.prep_high_score()
+    self.prep_level()
+    self.prep_ships()
 
-  def _prep_score(self):
+  def prep_score(self):
     """得点を描画用の画像に変換する"""
     rounded_score = round(self.stats.score, -1)
     score_str = "{:,}".format(rounded_score)
@@ -42,12 +48,35 @@ class ScoreBoard:
     self.high_score_rect.top = self.screen_rect.top
 
   def show_score(self):
-    """画面に得点を描画する"""
+    """画面に得点・レベル・宇宙船を描画する"""
     self.screen.blit(self.score_image,self.score_rect)
     self.screen.blit(self.high_score_image,self.high_score_rect)
+    self.screen.blit(self.level_image,self.level_rect)
+    self.ships.draw(self.screen)
 
   def check_high_score(self):
     """新しいハイスコアかをチェックし、必要であれば表示を更新する"""
     if self.stats.score > self.stats.high_score:
       self.stats.high_score = self.stats.score
       self.prep_high_score()
+
+  def prep_level(self):
+    """レベルを描画用の画像に変換する"""
+    level_str = str(self.stats.level)
+    self.level_image = self.font.render(level_str,True,
+            self.text_color, self.settings.bg_color)
+    
+    # 得点の下にレベルを表示する
+    self.level_rect = self.level_image.get_rect()
+    self.level_rect.right = self.score_rect.right
+    self.level_rect.top = self.score_rect.bottom + 10
+
+  def prep_ships(self):
+    """宇宙船の残数を表示する"""
+    self.ships = Group()
+    for ship_number in range(self.stats.ships_left):
+      ship = Ship(self.ai_game)
+      ship.rect.x = 10 + ship_number * ship.rect.width
+      ship.rect.y = 10
+      self.ships.add(ship)
+  

@@ -106,7 +106,7 @@ class AlienInvasion:
     if collisions:
       for aliens in collisions.values():
         self.stats.score += self.settings.alien_points * len(aliens)
-      self.sb._prep_score()
+      self.sb.prep_score()
       self.sb.check_high_score()
 
     if not self.aliens:
@@ -114,6 +114,10 @@ class AlienInvasion:
       self.bullets.empty()
       self._create_fleet()
       self.settings.increase_speed()
+
+      # レベルを増やす
+      self.stats.level += 1
+      self.sb.prep_level()
 
   def _create_fleet(self):
     """エイリアンの艦隊を作成する"""
@@ -176,6 +180,7 @@ class AlienInvasion:
     if self.stats.ships_left > 0:
       # 残りの宇宙船の数を減らす
       self.stats.ships_left -= 1
+      self.sb.prep_ships()
 
       # 残ったエイリアンと弾を廃棄する
       self.aliens.empty()
@@ -210,7 +215,9 @@ class AlienInvasion:
       #ゲームの統計情報をリセットする
       self.stats.reset_stats()
       self.stats.game_active = True
-      self.sb._prep_score()
+      self.sb.prep_score()
+      self.sb.prep_level()
+      self.sb.prep_ships()
 
       # 残ったエイリアンと弾を廃棄する
       self.aliens.empty()
